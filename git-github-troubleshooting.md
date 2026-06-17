@@ -1,15 +1,14 @@
 # 🚀 Git & GitHub Troubleshooting Journey
 
-This document captures all the issues I faced while setting up and using Git & GitHub on my local machine, along with how I debugged and resolved them.  
+This document captures the issues faced while working with Git & GitHub, along with debugging steps, root causes, and resolutions.
 
-This helped me understand real-world problems like authentication, branch mismatch, and repository configuration.
+It reflects real-world troubleshooting experience and understanding of Git workflows.
 
 ---
 
-# ✅ 1. Wrong `git pull` Command
+# ✅ 1. Incorrect `git pull` Syntax
 
 ## ❌ Issue
-I ran:
 git pull remote origin
 
 ## ❗ Error
@@ -17,14 +16,13 @@ git pull remote origin
 fatal: 'remote' does not appear to be a git repository
 
 ## 🔍 Root Cause
-- Git expects syntax:
+Incorrect argument order. Git expects:
 
 git pull  
-- I mistakenly placed arguments in the wrong order
 
 ## ✅ Fix
 
-git pull origin master
+git pull origin main
 
 ---
 
@@ -39,21 +37,20 @@ git pull origin master
 fatal: couldn't find remote ref master
 
 ## 🔍 Root Cause
-- GitHub now uses `main` as default branch
-- My local branch was `master`
-- Remote branch was `main`
+- Local branch: `master`
+- Remote branch: `main` (GitHub default)
 
 ## ✅ Fix
 
-### Check remote branches:
+### Check remote branches
 
 git branch -r
 
-### Pull correct branch:
+### Pull correct branch
 
 git pull origin main
 
-### Rename local branch (best practice):
+### Rename local branch (recommended)
 
 git branch -m master main
 git branch --set-upstream-to=origin/main main
@@ -71,21 +68,21 @@ git push origin main
 error: src refspec main does not match any
 
 ## 🔍 Root Cause
-- No commits were made yet
-- OR branch `main` did not exist locally
+- No local commit exists
+- OR branch does not exist locally
 
 ## ✅ Fix
 
-### Make first commit:
+### Create first commit
 
 git add .
 git commit -m "initial commit"
 
-### Rename branch:
+### Rename branch
 
 git branch -m master main
 
-### Push:
+### Push
 
 git push -u origin main
 
@@ -99,129 +96,161 @@ git push origin main
 
 ## ❗ Error
 
-Permission to korupoluAsritha/Flask-webapp.git denied to asritha_snps
+Permission denied to another account
 
 ## 🔍 Root Cause
-- I was logged in with **office GitHub account (`asritha_snps`)**
-- Repo belongs to **personal account (`korupoluAsritha`)**
-
-👉 Authentication mismatch
+- Logged in with a different GitHub account
+- Repository belongs to another account
 
 ## ✅ Fix
 
-### Clear stored GitHub credentials
+### Remove stored credentials
 - Open **Credential Manager**
-- Remove:
+- Delete GitHub entries
 
-github.com
-git:https://github.com
-
-### Push again:
+### Push again
 
 git push origin main
 
-### Login with correct account:
-
-korupoluAsritha
+### Login with correct account
 
 ---
 
-# ✅ 5. SSH Authentication Prompt
+# ✅ 5. SSH Host Verification
 
 ## ❌ Issue
 
 The authenticity of host 'github.com' can't be established
-Are you sure you want to continue connecting?
 
 ## 🔍 Root Cause
-- First-time SSH connection
-- Git doesn’t recognize GitHub server yet
+First-time SSH connection — host not trusted yet
 
 ## ✅ Fix
 
 yes
 
-👉 This adds GitHub fingerprint to known hosts
+👉 Adds GitHub to known hosts
 
 ---
 
-# ✅ 6. SSH Setup (if push still fails)
+# ✅ 6. SSH Setup (if authentication fails)
 
-## 🔹 Step 1: Generate SSH key
+## 🔹 Generate SSH key
 
-ssh-keygen -t ed25519 -C "your-email@gmail.com"
+ssh-keygen -t ed25519 -C "your-email"
 
-## 🔹 Step 2: Start SSH agent
+## 🔹 Start SSH agent
 
 eval "$(ssh-agent -s)"
 
-## 🔹 Step 3: Add key
+## 🔹 Add key
 
 ssh-add ~/.ssh/id_ed25519
 
-## 🔹 Step 4: Copy public key
+## 🔹 Copy key
 
 cat ~/.ssh/id_ed25519.pub
 
-## 🔹 Step 5: Add to GitHub
-- Go to → GitHub Settings → SSH Keys
-- Paste key
+## 🔹 Add to GitHub
+- Settings → SSH Keys → Add new key
 
-## 🔹 Step 6: Test connection
+## 🔹 Test connection
 
 ssh -T git@github.com
 
-✅ Expected output:
+---
 
-Hi ! You've successfully authenticated.
+# ✅ 7. Understanding and Using Key Git Commands
+
+## 🔹 Check remote repository
+
+git remote -v
+
+### ✅ Usage
+- Shows connected remote URLs (fetch & push)
+- Helps verify correct repository linkage
+
+---
+
+## 🔹 Add remote repository
+
+git remote add origin https://github.com/username/repo.git
+
+### ✅ Usage
+- Connects local repo to GitHub
+- `origin` = default remote name
+
+---
+
+## 🔹 Update remote URL (switch HTTPS → SSH)
+
+git remote set-url origin git@github.com:username/repo.git
+
+### ✅ Usage
+- Changes repo authentication method
+- Useful for SSH setup (no repeated login)
+
+---
+
+## 🔹 View Git configuration
+
+git config --list
+
+### ✅ Usage
+- Displays all Git settings
+- Helps debug username/email issues
+
+---
+
+## 🔹 Set global username
+
+git config --global user.name "your-name"
+
+### ✅ Usage
+- Sets commit author name globally
+
+---
+
+## 🔹 Set global email
+
+git config --global user.email "your-email"
+
+### ✅ Usage
+- Sets email associated with commits
+
+---
+
+## 🔹 Configure pull behavior
+
+git config --global pull.rebase false
+
+### ✅ Usage
+- Ensures `git pull` uses merge instead of rebase
+- Avoids confusion for beginners
 
 ---
 
 # 🎯 Key Learnings
 
-✅ Git commands must follow exact syntax  
-✅ Branch mismatch (`main` vs `master`) is very common  
+✅ Correct Git syntax is crucial  
+✅ Branch mismatch (`main` vs `master`) is common  
 ✅ GitHub authentication depends on stored credentials  
-✅ SSH setup avoids repeated login issues  
-✅ Debugging errors improves real DevOps skills  
+✅ SSH setup provides a smoother workflow  
+✅ Git debugging is an essential DevOps skill  
 
 ---
 
 # 🚀 DevOps Takeaway
 
-These Git issues are not just beginner mistakes — they reflect real-world DevOps problems:
+These issues are not just beginner mistakes — they reflect real-world DevOps scenarios:
 
 - CI/CD pipeline failures  
-- Authentication issues  
-- Permission errors  
-- Environment misconfiguration  
+- Authentication and access control issues  
+- Incorrect configurations  
+- Environment mismatches  
 
-👉 Solving these builds the mindset needed for DevOps engineering.
-
----
-
-# ✅ Final Workflow I Follow Now
-
-
-git add .
-git commit -m "message"
-git push
+👉 Solving these builds strong debugging and problem-solving skills.
 
 ---
 
-# 💡 Future Improvement
-
-- Use SSH instead of HTTPS
-- Maintain separate configs for personal & office GitHub
-- Keep daily commits for learning consistency
-
----
-
-# ✅ Conclusion
-
-This troubleshooting experience helped me:
-- Understand Git deeply
-- Fix real-world errors
-- Improve debugging skills
-
-👉 Every error improved my DevOps understanding.
+# ✅ Final Workflow
